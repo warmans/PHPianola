@@ -1,0 +1,10 @@
+{
+    "require": {
+        "symfony/filesystem": "v2.2.0",
+        "psr/log": "dev-master"
+    },
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-0": {"PHPianola": "src/"}
+    }
+}
