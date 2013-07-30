@@ -17,6 +17,7 @@ class HttpRequest extends \PHPianola\JobServer\Job
 
     public function execute()
     {
-        file_get_contents($this->uri);
+        $page = file_get_contents($this->uri);
+        return $this->returnResult(true, md5($page).':200');
     }
 }

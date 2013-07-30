@@ -32,6 +32,12 @@ class Timer
         return $this->formatMilliseconds(($end*1000) - ($this->start_microtime*1000));
     }
 
+    public function elapsedSeconds()
+    {
+        $end = $this->end_microtime ?: microtime(true);
+        return ($end) - ($this->start_microtime);
+    }
+
     /**
      * @url http://stackoverflow.com/questions/4763668/php-convert-milliseconds-to-hours-minutes-seconds-fractional
      * @param int $milliseconds

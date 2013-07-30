@@ -30,8 +30,6 @@ class Worker implements \Psr\Log\LoggerAwareInterface
         $collection = new Ipc\Socket\Collection();
         $collection->attach($this->socket);
 
-
-
         while (1) {
             //initial request
             $this->socket->write(new Ipc\Package(Package::TYPE_JOB_REQUEST, null));
@@ -59,14 +57,17 @@ class Worker implements \Psr\Log\LoggerAwareInterface
 
                     $this->logger->debug('New Job');
 
-                    //only respond to non ack/fire-and-forget messages
-                    if (!in_array($msg->getType(), array(Ipc\Package::TYPE_ACK, Ipc\Package::TYPE_FIRE_AND_FORGET))) {
-                        $read_socket->write(new Ipc\Package(Ipc\Package::TYPE_ACK, 'OK', $msg->getFrom()));
-                    }
-
                     if ($result = $this->handleMsg($msg)) {
-                        $this->logger->info('Job Completed by '.getmypid());
+                        //send report
+                        $read_socket->write(
+                            new Ipc\Package(
+                                Package::TYPE_JOB_REPORT,
+                                json_encode(array_merge($result, array('worker' => getmypid()))),
+                                $msg->getFrom()
+                            )
+                        );
                     } else {
+                        //discard failed jobs. The sender knows how many they sent. They can infer the failure rate.
                         $this->logger->error('Job Failed by '.getmypid());
                     }
                 }
@@ -77,14 +78,10 @@ class Worker implements \Psr\Log\LoggerAwareInterface
     public function handleMsg($msg)
     {
         switch ($msg->getType()) {
-
             case (Package::TYPE_JOB):
                 return $msg->getPayload()->execute();
-                break;
-
             default:
-                //other
-                break;
+                return array('success' => false, 'result' => 'unknown type:'.$msg->getType());
         }
     }
 }

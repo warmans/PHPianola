@@ -10,4 +10,5 @@ class Package extends \PHPianola\Ipc\Package
 {
     const TYPE_JOB = 'job';
     const TYPE_JOB_REQUEST = 'jobreq';
+    const TYPE_JOB_REPORT = 'jobrpt';
 }
